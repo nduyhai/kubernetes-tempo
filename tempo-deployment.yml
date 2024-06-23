@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: tempo
+  name: tempo-deployment
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tempo
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: tempo
+    spec:
+      containers:
+        - args:
+            - "--config.file=/etc/tempo/tempo-local.yaml"
+          image: grafana/tempo:latest
+          name: tempo
+          ports:
+            - containerPort: 14268
+            - containerPort: 3200
+            - containerPort: 9095
+            - containerPort: 4317
+            - containerPort: 4318
+            - containerPort: 9411
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/tempo
+              name: tempo-config-volume
+      restartPolicy: Always
+      volumes:
+        - name: tempo-config-volume
+          configMap:
+            defaultMode: 420
+            name: tempo-server-conf
